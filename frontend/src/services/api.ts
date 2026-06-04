@@ -10,14 +10,12 @@ export const uploadSyllabus = (formData: FormData) => {
 
 export const chatQuery = (
   payload: {
+    session_id: string;
     question: string;
     department: string;
     batch_year: string;
     semester_level: string;
   }
 ) => {
-  return API.post(
-    "/chat",
-    payload
-  );
+  return API.post("/chat", payload);
 };

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Form, UploadFile, File
 import os
 import shutil
 from app.core.ingest import ingest_syllabus
-from app.core.document_filter import is_valid_document
+
 
 router = APIRouter()
 
@@ -27,14 +27,7 @@ async def upload_syllabus(
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(pdf_file.file, buffer)
 
-    # 3. AI document validation (IMPORTANT)
-    is_valid, reason = is_valid_document(file_path)
-
-    if not is_valid:
-        return {
-            "message": "Upload rejected",
-            "reason": reason
-        }
+ 
 
     # 4. Ingest into vector DB
     chunks = ingest_syllabus(
