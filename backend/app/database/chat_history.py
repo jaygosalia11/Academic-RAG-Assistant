@@ -1,26 +1,18 @@
 from app.database.connection import get_connection
 
+def create_session(session_id, title="New Chat"):
+    conn = get_connection()
+    cur = conn.cursor()
 
-def create_session(session_id):
+    cur.execute("""
+        INSERT INTO academic_rag.chat_sessions (id, title)
+        VALUES (%s, %s)
+        ON CONFLICT (id) DO NOTHING
+    """, (session_id, title))
 
-    connection = get_connection()
-
-    cursor = connection.cursor()
-
-    cursor.execute(
-        """
-        INSERT INTO academic_rag.chat_sessions(id)
-        VALUES (%s)
-        ON CONFLICT (id)
-        DO NOTHING
-        """,
-        (session_id,)
-    )
-
-    connection.commit()
-
-    cursor.close()
-    connection.close()
+    conn.commit()
+    cur.close()
+    conn.close()
 
 def save_message(
     session_id,
@@ -52,22 +44,16 @@ def save_message(
     cursor.close()
     connection.close()
 
-
-    def get_messages(session_id):
-
+def get_messages(session_id):
     connection = get_connection()
-
     cursor = connection.cursor()
 
-    cursor.execute(
-        """
+    cursor.execute("""
         SELECT role, message
         FROM academic_rag.chat_messages
         WHERE session_id = %s
         ORDER BY created_at
-        """,
-        (session_id,)
-    )
+    """, (session_id,))
 
     messages = cursor.fetchall()
 

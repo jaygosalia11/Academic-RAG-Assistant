@@ -39,24 +39,38 @@ def store_chunks(chunks):
 # -----------------------------
 # SEARCH FUNCTION 
 # -----------------------------
-def search(query: str, k: int = 5, department=None, batch_year=None, semester_level=None):
+
+
+def search(
+    query: str,
+    k: int = 5,
+    department=None,
+    batch_year=None,
+    semester_level=None
+):
 
     query_vector = model.encode(query).tolist()
 
-    where_filter = {}
-
+    filters = []
 
     if department:
-        where_filter["department"] = department
+        filters.append({"department": {"$eq": department}})
 
     if batch_year:
-        where_filter["batch_year"] = batch_year
+        filters.append({"batch_year": {"$eq": batch_year}})
 
     if semester_level:
-        where_filter["semester_level"] = semester_level
+        filters.append({"semester_level": {"$eq": semester_level}})
 
-    if not where_filter:
-        where_filter = None
+    where_filter = None
+
+    if len(filters) == 1:
+        where_filter = filters[0]
+
+    elif len(filters) > 1:
+        where_filter = {
+            "$and": filters
+        }
 
     results = collection.query(
         query_embeddings=[query_vector],
