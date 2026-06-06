@@ -177,8 +177,8 @@ const user = JSON.parse(localStorage.getItem("user") || "{}");
         session_id: getSessionId(),
         question: currentQuestion,
         department: user.department,
-        batch_year: user.batch,
-        semester_level: user.semester,
+        batch_year: user.batch_year,
+        semester_level: user.semester_level,
         user_id: user.id,
       });
       addMessage("assistant", response.data.answer);
