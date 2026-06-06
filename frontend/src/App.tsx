@@ -158,9 +158,9 @@ const App: React.FC = () => {
             <Route
               path="/chat"
               element={
-                // <ProtectedRoute>
+                <ProtectedRoute>
                   <ChatPage />
-                // </ProtectedRoute>
+                </ProtectedRoute>
               }
             />
 
@@ -170,7 +170,7 @@ const App: React.FC = () => {
               element={
                 <ProtectedRoute>
                   <AdminUpload />
-                </ProtectedRoute>
+               </ProtectedRoute>
               }
             />
 

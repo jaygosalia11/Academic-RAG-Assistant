@@ -1,10 +1,13 @@
 from app.database.connection import get_connection
 
+
 def create_session(session_id, user_id, title="New Chat"):
+
     conn = get_connection()
     cur = conn.cursor()
 
-    cur.execute("""
+    cur.execute(
+        """
         INSERT INTO academic_rag.chat_sessions (
             id,
             title,
@@ -12,11 +15,26 @@ def create_session(session_id, user_id, title="New Chat"):
         )
         VALUES (%s, %s, %s)
         ON CONFLICT (id) DO NOTHING
-    """, (
-        session_id,
-        title,
-        user_id
-    ))
+        """,
+        (
+            session_id,
+            title,
+            user_id
+        )
+    )
+
+    conn.commit()
+
+    cur.close()
+    conn.close()
+
+
+def save_message(
+    session_id,
+    role,
+    message
+):
+
     connection = get_connection()
 
     cursor = connection.cursor()
@@ -42,16 +60,22 @@ def create_session(session_id, user_id, title="New Chat"):
     cursor.close()
     connection.close()
 
+
 def get_messages(session_id):
+
     connection = get_connection()
+
     cursor = connection.cursor()
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT role, message
         FROM academic_rag.chat_messages
         WHERE session_id = %s
         ORDER BY created_at
-    """, (session_id,))
+        """,
+        (session_id,)
+    )
 
     messages = cursor.fetchall()
 
