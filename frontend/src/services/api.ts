@@ -11,14 +11,19 @@ export const uploadSyllabus = (formData: FormData) => {
 };
 
 
-export const createSession = (session_id: string) => {
-  return API.post("/chat-session/create", { session_id });
+export const createSession = (
+  session_id: string,
+  user_id: number
+) => {
+  return API.post("/chat-session/create", {
+    session_id,
+    user_id,
+  });
 };
 
-export const getSessions = () => {
-  return API.get("/chat-sessions");
+export const getSessions = (userId: number) => {
+  return API.get(`/chat-sessions/${userId}`);
 };
-
 
 export const chatQuery = (payload: {
   session_id: string;
@@ -26,6 +31,7 @@ export const chatQuery = (payload: {
   department: string;
   batch_year: string;
   semester_level: string;
+  user_id: number;
 }) => {
   return API.post("/chat", payload);
 };
@@ -41,6 +47,9 @@ export const registerUser = (payload: {
   name: string;
   email: string;
   password: string;
+  department: string;
+  batch: string;
+  semester: string;
 }) => {
   return API.post("/auth/register", payload);
 };

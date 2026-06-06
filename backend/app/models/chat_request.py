@@ -7,3 +7,4 @@ class ChatRequest(BaseModel):
     department: str
     batch_year: str
     semester_level: str
+    user_id: int

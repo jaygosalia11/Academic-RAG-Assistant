@@ -24,17 +24,17 @@ def verify_password(
     )
 
 # create user
-def create_user(name, email, password):
+def create_user(name, email, password, department, batch, semester):
     conn = get_connection()
     cur = conn.cursor()
 
     hashed = hash_password(password)
 
     cur.execute("""
-        INSERT INTO academic_rag.users (name, email, password)
-        VALUES (%s, %s, %s)
-        RETURNING id, name, email
-    """, (name, email, hashed))
+        INSERT INTO academic_rag.users (name, email, password, department, batch, semester)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        RETURNING id, name, email, department, batch, semester
+    """, (name, email, hashed, department, batch, semester))
 
     user = cur.fetchone()
 

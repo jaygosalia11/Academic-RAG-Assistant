@@ -1,24 +1,22 @@
 from app.database.connection import get_connection
 
-def create_session(session_id, title="New Chat"):
+def create_session(session_id, user_id, title="New Chat"):
     conn = get_connection()
     cur = conn.cursor()
 
     cur.execute("""
-        INSERT INTO academic_rag.chat_sessions (id, title)
-        VALUES (%s, %s)
+        INSERT INTO academic_rag.chat_sessions (
+            id,
+            title,
+            user_id
+        )
+        VALUES (%s, %s, %s)
         ON CONFLICT (id) DO NOTHING
-    """, (session_id, title))
-
-    conn.commit()
-    cur.close()
-    conn.close()
-
-def save_message(
-    session_id,
-    role,
-    message
-):
+    """, (
+        session_id,
+        title,
+        user_id
+    ))
     connection = get_connection()
 
     cursor = connection.cursor()

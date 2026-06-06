@@ -20,7 +20,7 @@ router = APIRouter()
 @router.post("/chat")
 def chat(request: ChatRequest):
 
-    create_session(request.session_id)
+    create_session(request.session_id, request.user_id)
 
     save_message(
         request.session_id,
@@ -63,17 +63,21 @@ def chat_history(session_id: str):
 # =========================
 # GET ALL SESSIONS
 # =========================
-@router.get("/chat-sessions")
-def get_sessions():
+@router.get("/chat-sessions/{user_id}")
+def get_sessions(user_id: int):
 
     conn = get_connection()
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT id, title, created_at
+        SELECT
+            id,
+            title,
+            created_at
         FROM academic_rag.chat_sessions
+        WHERE user_id = %s
         ORDER BY created_at DESC
-    """)
+    """, (user_id,))
 
     rows = cur.fetchall()
 
@@ -91,16 +95,22 @@ def get_sessions():
         ]
     }
 
-
 # =========================
 # CREATE SESSION API
 # =========================
+
+
 @router.post("/chat-session/create")
 def create_chat_session(payload: dict):
 
     session_id = payload["session_id"]
 
-    create_session(session_id)
+    user_id = payload["user_id"]
+
+    create_session(
+        session_id,
+        user_id
+    )
 
     return {
         "message": "Session created",

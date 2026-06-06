@@ -158,9 +158,9 @@ const App: React.FC = () => {
             <Route
               path="/chat"
               element={
-                <ProtectedRoute>
+                // <ProtectedRoute>
                   <ChatPage />
-                </ProtectedRoute>
+                // </ProtectedRoute>
               }
             />
 

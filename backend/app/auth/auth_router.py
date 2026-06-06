@@ -29,7 +29,7 @@ def register(req: RegisterRequest):
     if existing_user:
         raise HTTPException(status_code=400, detail="User already exists")
 
-    user = create_user(req.name, req.email, req.password)
+    user = create_user(req.name, req.email, req.password,req.department, req.batch, req.semester)
 
     return {
         "message": "User registered successfully",
@@ -59,6 +59,9 @@ def login(req: LoginRequest):
         "user": {
             "id": user[0],
             "name": user[1],
-            "email": user[2]
+            "email": user[2],
+             "department": user[4],
+            "batch_year": user[5],
+            "semester_level": user[6],
         }
     }
