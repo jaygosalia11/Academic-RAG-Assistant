@@ -45,13 +45,19 @@ def create_user(name, email, password, department, batch, semester):
     return user
 
 
-# get user by email
 def get_user_by_email(email):
     conn = get_connection()
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT id, name, email, password
+        SELECT
+            id,
+            name,
+            email,
+            password,
+            department,
+            batch,
+            semester
         FROM academic_rag.users
         WHERE email = %s
     """, (email,))

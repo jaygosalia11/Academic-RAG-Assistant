@@ -14,6 +14,9 @@ class RegisterRequest(BaseModel):
     name: str
     email: str
     password: str
+    department: str
+    batch: str
+    semester: str
 
 
 class LoginRequest(BaseModel):
