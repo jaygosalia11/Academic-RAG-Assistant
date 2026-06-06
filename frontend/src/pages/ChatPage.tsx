@@ -18,6 +18,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import AcademicFilters from "../components/AcademicFilters";
 import MessageBubble from "../components/MessageBubble";
 import ChatInput from "../components/ChatInput";
+import { useNavigate } from "react-router-dom";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 import {
   chatQuery,
@@ -32,10 +34,11 @@ interface Message {
 }
 
 const ChatPage = () => {
+    const navigate = useNavigate();
   const [department, setDepartment] = useState("");
   const [batchYear, setBatchYear] = useState("");
   const [semesterLevel, setSemesterLevel] = useState("");
-  // Unified loader: true during initial history fetch OR when switching/creating sessions
+
   const [pageLoading, setPageLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -46,12 +49,12 @@ const ChatPage = () => {
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // ─── Auto-scroll to bottom on new messages ───────────────────────────────
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  // ─── Load history + sessions on mount ────────────────────────────────────
+
   useEffect(() => {
     loadHistory();
     loadSessions();
@@ -60,7 +63,7 @@ const ChatPage = () => {
   const isContextSelected =
     Boolean(department) && Boolean(batchYear) && Boolean(semesterLevel);
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
+
   const addMessage = (role: "user" | "assistant", text: string) => {
     setMessages((prev) => [...prev, { role, text }]);
   };
@@ -90,7 +93,7 @@ const ChatPage = () => {
 setSessions(res.data.sessions);
       const data = res.data; 
       setSessions(data.sessions);
-      // Fix 5: auto-highlight the first session if none is active yet
+      
       if (!activeSession && data.sessions.length > 0) {
         setActiveSession(data.sessions[0].id);
       }
@@ -99,10 +102,17 @@ setSessions(res.data.sessions);
     }
   };
 
+
+  const handleLogout = () => {
+  localStorage.removeItem("user");
+  localStorage.removeItem("session_id");
+  navigate("/login");
+};
+
   const loadSession = async (sessionId: string) => {
     setActiveSession(sessionId);
-    localStorage.setItem("session_id", sessionId); // Fix 1: keep storage in sync
-    setPageLoading(true);                           // Fix 4: prevent empty-state flash
+    localStorage.setItem("session_id", sessionId); 
+    setPageLoading(true);                         
     try {
       const res = await getChatHistory(sessionId);
       const history = res.data.messages || [];
@@ -122,15 +132,15 @@ setSessions(res.data.sessions);
      await createSession(newId);
     } catch (err) {
       console.error("Failed to register new session on backend:", err);
-      // Continue anyway — session will be created implicitly on first message
+     
     }
     localStorage.setItem("session_id", newId);
     setActiveSession(newId);
     setMessages([]);
-    loadSessions(); // refresh sidebar so new session appears
+    loadSessions();
   };
 
-  // ─── Send message ─────────────────────────────────────────────────────────
+ 
   const handleSend = async () => {
     if (!query.trim()) return;
 
@@ -156,9 +166,9 @@ setSessions(res.data.sessions);
     }
   };
 
-  // ─── Render ───────────────────────────────────────────────────────────────
+
   return (
-    // ✅ STEP 1 — Background Box: untouched exactly as before
+   
     <Box
       sx={{
         minHeight: "100vh",
@@ -192,7 +202,7 @@ setSessions(res.data.sessions);
         },
       }}
     >
-      {/* Noise overlay — untouched */}
+    
       <Box
         sx={{
           position: "fixed",
@@ -206,7 +216,7 @@ setSessions(res.data.sessions);
         }}
       />
 
-      {/* ── Hamburger button — fixed top-left ── */}
+  
       <Box
         onClick={() => setDrawerOpen(true)}
         sx={{
@@ -236,7 +246,29 @@ setSessions(res.data.sessions);
         ☰
       </Box>
 
-      {/* ── Sliding Drawer ── */}
+
+   
+      <IconButton
+        onClick={handleLogout}
+        title="Logout"
+        sx={{
+          position: "fixed", top: 12, right: 16, zIndex: 10,
+          color: "rgba(165,180,252,0.6)",
+          background: "rgba(255,255,255,0.06)",
+          border: "1px solid rgba(165,180,252,0.12)",
+          backdropFilter: "blur(12px)",
+          "&:hover": {
+            background: "rgba(239,68,68,0.15)",
+            border: "1px solid rgba(239,68,68,0.35)",
+            color: "#f87171",
+          },
+          transition: "all 0.2s ease",
+        }}
+      >
+        <LogoutIcon fontSize="small" />
+      </IconButton>
+
+    
       <Drawer
         anchor="left"
         open={drawerOpen}
@@ -252,7 +284,7 @@ setSessions(res.data.sessions);
             boxShadow: "4px 0 32px rgba(0,0,0,0.5)",
             display: "flex",
             flexDirection: "column",
-            // Scrollbar
+   
             "&::-webkit-scrollbar": { width: "4px" },
             "&::-webkit-scrollbar-track": { background: "transparent" },
             "&::-webkit-scrollbar-thumb": {
@@ -260,10 +292,10 @@ setSessions(res.data.sessions);
               borderRadius: "10px",
             },
           },
-          },  // paper
+          }, 
         }}
       >
-        {/* Drawer header */}
+    
         <Box
           sx={{
             display: "flex",
@@ -285,7 +317,7 @@ setSessions(res.data.sessions);
           </IconButton>
         </Box>
 
-        {/* New Chat button */}
+   
         <Box
           onClick={() => { handleNewChat(); setDrawerOpen(false); }}
           sx={{
@@ -311,7 +343,7 @@ setSessions(res.data.sessions);
           + New Chat
         </Box>
 
-        {/* Session list */}
+      
         <Box sx={{ px: 2, pb: 2, overflowY: "auto", flex: 1 }}>
           {sessions.map((s) => (
             <Box
@@ -343,7 +375,7 @@ setSessions(res.data.sessions);
         </Box>
       </Drawer>
 
-      {/* ── Main content (full width now, no sidebar) ── */}
+
       <Box sx={{ position: "relative", zIndex: 2 }}>
         <Container maxWidth="lg" sx={{ position: "relative", zIndex: 2, py: 5 }}>
 
@@ -370,7 +402,7 @@ setSessions(res.data.sessions);
               />
             </Box>
 
-            {/* Filters panel */}
+
             <Paper
               elevation={0}
               sx={{
@@ -393,7 +425,7 @@ setSessions(res.data.sessions);
               />
             </Paper>
 
-            {/* Messages panel */}
+        
             <Paper
               elevation={0}
               sx={{
@@ -473,7 +505,7 @@ setSessions(res.data.sessions);
               <div ref={bottomRef} />
             </Paper>
 
-            {/* Chat input */}
+   
             <Paper
               elevation={0}
               sx={{

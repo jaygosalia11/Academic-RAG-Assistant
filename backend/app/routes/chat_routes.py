@@ -10,7 +10,7 @@ from app.database.chat_history import (
     get_messages
 )
 
-from app.database.connection import get_connection  # ✅ FIXED IMPORT
+from app.database.connection import get_connection 
 
 router = APIRouter()
 
