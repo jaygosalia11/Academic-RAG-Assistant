@@ -2,9 +2,15 @@
 from app.core.vectorstore import search
 from app.core.prompt_templates import get_rag_prompt
 
-from langchain_community.llms import Ollama
+# from langchain_community.llms import Ollama
+from langchain_ollama import ChatOllama
 
-llm = Ollama(model="llama3")
+# llm = Ollama(model="llama3")
+llm = ChatOllama(
+     model = "llama3.2:3b",
+     temperature=0,
+     num_predict=300
+)
 
 
 def run_rag(query, history, department=None, batch_year=None, semester_level=None):
@@ -35,6 +41,6 @@ def run_rag(query, history, department=None, batch_year=None, semester_level=Non
 
     return {
         "query": query,
-        "answer": answer,
+        "answer": answer.content,
         "contexts_used": contexts
     }
