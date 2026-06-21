@@ -1,17 +1,10 @@
-
 import React from "react";
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
 import MainLayout from "./layout/MainLayout";
-
 
 import ChatPage from "./pages/ChatPage";
 import Login from "./pages/Login";
@@ -113,17 +106,25 @@ const darkTheme = createTheme({
   },
 });
 
-const ProtectedRoute = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const user = localStorage.getItem("user");
 
-  return user ? (
+  return user ? <>{children}</> : <Navigate to="/login" replace />;
+};
+
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const userString = localStorage.getItem("user");
+
+  if (!userString) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const user = JSON.parse(userString);
+
+  return user.role === "ADMIN" ? (
     <>{children}</>
   ) : (
-    <Navigate to="/login" replace />
+    <Navigate to="/student" replace />
   );
 };
 
@@ -132,99 +133,72 @@ const App: React.FC = () => {
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
 
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        theme="dark"
-      />
+      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
 
       <BrowserRouter>
         <MainLayout>
           <Routes>
+            <Route path="/" element={<LandingPage />} />
 
-         
-            <Route
-              path="/"
-              element={<LandingPage />}
-            />
+            <Route path="/login" element={<Login />} />
 
-            <Route
-              path="/login"
-              element={<Login />}
-            />
+            <Route path="/register" element={<Register />} />
 
-  
-            <Route
-              path="/register"
-              element={<Register />}
-            />
-
-  
-            <Route
-              path="/chat"
-              element={
-  
-                  <ChatPage />
-
-              }
-            />
-
+            <Route path="/chat" element={<ChatPage />} />
 
             <Route
               path="/student"
               element={
-                // <ProtectedRoute>
+                <ProtectedRoute>
                   <StudentHome />
-              //  </ProtectedRoute>
+                </ProtectedRoute>
               }
             />
 
             <Route
               path="/student/report"
               element={
-                // <ProtectedRoute>
+                <ProtectedRoute>
                   <StudentReport />
-              //  </ProtectedRoute>
+                </ProtectedRoute>
               }
             />
 
             <Route
               path="/admin"
               element={
-                // <ProtectedRoute>
+                <AdminRoute>
                   <AdminHome />
-              //  </ProtectedRoute>
+                </AdminRoute>
               }
             />
-
 
             <Route
               path="/admin/syllabus"
               element={
-                // <ProtectedRoute>
+                <AdminRoute>
                   <AdminSyllabusUpload />
-              //  </ProtectedRoute>
+                </AdminRoute>
               }
             />
 
             <Route
               path="/admin/marksheet"
               element={
-                // <ProtectedRoute>
+                <AdminRoute>
                   <AdminMarksheetUpload />
-              //  </ProtectedRoute>
+                </AdminRoute>
               }
             />
 
             <Route
               path="/admin/marksheet/history"
               element={
-                // <ProtectedRoute>
+                <AdminRoute>
                   <MarksheetHistory />
-              //  </ProtectedRoute>
+                </AdminRoute>
               }
             />
-
           </Routes>
         </MainLayout>
       </BrowserRouter>

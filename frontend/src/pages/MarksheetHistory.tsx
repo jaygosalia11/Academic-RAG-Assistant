@@ -12,8 +12,7 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SchoolIcon from "@mui/icons-material/School";
 
-import { getAllMarksheets } from "../services/api";
-import { COLLEGES } from "../constants/academic";
+import { getAllMarksheets, getColleges } from "../services/api";
 
 type MarksheetRow = {
   document_id: number;
@@ -30,25 +29,35 @@ type MarksheetRow = {
   uploaded_at: string;
 };
 
+type College = {
+  id: number;
+  college_name: string;
+};
+
 const STATUS_STYLES: Record<string, { color: string; bg: string }> = {
   COMPLETED: { color: "#6ee7b7", bg: "rgba(16,185,129,0.15)" },
   PROCESSING: { color: "#fcd34d", bg: "rgba(245,158,11,0.15)" },
   FAILED: { color: "#f87171", bg: "rgba(239,68,68,0.15)" },
 };
 
-const collegeName = (id: number) =>
-  COLLEGES.find((c) => c.id === id)?.college_name ?? `College #${id}`;
-
 function MarksheetHistory() {
   const navigate = useNavigate();
   const [rows, setRows] = useState<MarksheetRow[]>([]);
+  const [colleges, setColleges] = useState<College[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const collegeName = (id: number) =>
+    colleges.find((c) => c.id === id)?.college_name ?? `College #${id}`;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res:any = await getAllMarksheets();
-        setRows(res.data?.data ?? []);
+        const [marksheetsRes, collegesRes]: [any, any] = await Promise.all([
+          getAllMarksheets(),
+          getColleges(),
+        ]);
+        setRows(marksheetsRes.data?.data ?? []);
+        setColleges(collegesRes.data?.data ?? []);
       } catch (err) {
         console.error(err);
       } finally {

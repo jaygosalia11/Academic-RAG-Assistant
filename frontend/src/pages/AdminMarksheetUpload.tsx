@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -19,8 +18,12 @@ import UploadFileIcon from "@mui/icons-material/UploadFile";
 import SchoolIcon from "@mui/icons-material/School";
 import HistoryIcon from "@mui/icons-material/History";
 
-import { uploadMarksheet } from "../services/api";
-import { COLLEGES } from "../constants/academic";
+import { uploadMarksheet, getColleges } from "../services/api";
+
+type College = {
+  id: number;
+  college_name: string;
+};
 
 type FormDataType = {
   student_id: number;
@@ -58,6 +61,8 @@ const schema = yup.object({
 function AdminMarksheetUpload() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [colleges, setColleges] = useState<College[]>([]);
+  const [collegesLoading, setCollegesLoading] = useState(false);
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
 const isAdmin = user.role === "ADMIN";
@@ -84,6 +89,21 @@ const collegeId = user.college_id || "";
     setValue("college_id", collegeId);
   }
 }, [isAdmin, collegeId, setValue]);
+
+  useEffect(() => {
+    const fetchColleges = async () => {
+      setCollegesLoading(true);
+      try {
+        const res = await getColleges();
+        setColleges(res.data?.data ?? []);
+      } catch (err) {
+        console.error("Failed to fetch colleges", err);
+      } finally {
+        setCollegesLoading(false);
+      }
+    };
+    fetchColleges();
+  }, []);
 
   const onSubmit = async (data: FormDataType) => {
     setLoading(true);
@@ -203,15 +223,15 @@ const collegeId = user.college_id || "";
   label="College"
   {...register("college_id")}
   value={watch("college_id") || ""}
-  disabled={isAdmin}
+  disabled={isAdmin || collegesLoading}
   error={!!errors.college_id}
   helperText={
     errors.college_id?.message ||
-    (isAdmin ? "Assigned college" : "")
+    (isAdmin ? "Assigned college" : collegesLoading ? "Loading colleges..." : "")
   }
   sx={{ mb: 2, ...inputSx }}
 >
-  {COLLEGES.map((c) => (
+  {colleges.map((c) => (
     <MenuItem
       key={c.id}
       value={c.id}

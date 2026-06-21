@@ -48,13 +48,17 @@ const onSubmit = async (data: FormData) => {
     });
 
     console.log("Login success:", res.data);
-
+ const user = res.data.user;
 localStorage.setItem(
   "user",
   JSON.stringify(res.data.user)
 );
 
-    navigate("/student");
+    if (user.role === "ADMIN") {
+      navigate("/admin");
+    } else {
+      navigate("/student");
+    }
   } catch (err) {
     console.error("Login failed", err);
     alert("Invalid credentials");
