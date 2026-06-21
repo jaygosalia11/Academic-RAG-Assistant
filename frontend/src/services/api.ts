@@ -89,3 +89,17 @@ export const getDashboardSummary = (collegeId: number) => {
 export const getColleges = () => {
   return API.get("/colleges");
 };
+
+
+export const getTotalCredits = (studentId: number) => {
+  return API.get(`/students/${studentId}/total-credits`);
+};
+
+
+export const getCreditsHistory = (studentId: number) => {
+  return API.get(`/students/${studentId}/credits-history`);
+};
+
+export const getSgpiHistory = (studentId: number) => {
+  return API.get(`/students/${studentId}/sgpi-history`);
+};

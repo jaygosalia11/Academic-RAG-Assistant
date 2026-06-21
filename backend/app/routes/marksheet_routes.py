@@ -305,3 +305,111 @@ async def get_dashboard_summary(college_id: int):
     finally:
         cursor.close()
         conn.close()
+
+@router.get("/students/{student_id}/sgpi-history")
+async def get_sgpi_history(student_id: int):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+
+        cursor.execute("""
+            SELECT
+                semester,
+                MAX(sgpi) AS sgpi
+            FROM academic_rag.marksheet_data
+            WHERE user_id = %s
+            GROUP BY semester
+            ORDER BY semester
+        """, (student_id,))
+
+        rows = cursor.fetchall()
+
+        if not rows:
+            raise HTTPException(
+                status_code=404,
+                detail="No marksheet data found."
+            )
+
+        result = []
+
+        for row in rows:
+            result.append({
+                "semester": row[0],
+                "sgpi": float(row[1]) if row[1] is not None else None
+            })
+
+        return {
+            "student_id": student_id,
+            "data": result
+        }
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@router.get("/students/{student_id}/total-credits")
+async def get_total_credits(student_id: int):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+
+        cursor.execute("""
+            SELECT
+                COALESCE(SUM(credit_earned), 0)
+            FROM academic_rag.marksheet_data
+            WHERE user_id = %s
+        """, (student_id,))
+
+        total_credits = cursor.fetchone()[0]
+
+        return {
+            "student_id": student_id,
+            "total_credits_earned": int(total_credits)
+        }
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@router.get("/students/{student_id}/credits-history")
+async def get_credits_history(student_id: int):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+
+        cursor.execute("""
+            SELECT
+                semester,
+                SUM(credit_earned) AS total_credits
+            FROM academic_rag.marksheet_data
+            WHERE user_id = %s
+            GROUP BY semester
+            ORDER BY semester
+        """, (student_id,))
+
+        rows = cursor.fetchall()
+
+        result = []
+
+        for row in rows:
+            result.append({
+                "semester": row[0],
+                "credits_earned": int(row[1])
+            })
+
+        return {
+            "student_id": student_id,
+            "data": result
+        }
+
+    finally:
+        cursor.close()
+        conn.close()

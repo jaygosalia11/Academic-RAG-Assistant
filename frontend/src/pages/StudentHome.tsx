@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import SchoolIcon from "@mui/icons-material/School";
 import ChatIcon from "@mui/icons-material/Chat";
 import AssessmentIcon from "@mui/icons-material/Assessment";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
 const StudentHome: React.FC = () => {
@@ -23,6 +24,13 @@ const StudentHome: React.FC = () => {
       icon: <AssessmentIcon sx={{ fontSize: 22 }} />,
       path: "/student/report",
       accent: "#10b981",
+    },
+    {
+      title: "Track Your Progress",
+      desc: "See your SGPI trend and credits earned across semesters.",
+      icon: <TrendingUpIcon sx={{ fontSize: 22 }} />,
+      path: "/student/progress",
+      accent: "#f59e0b",
     },
   ];
 
@@ -62,7 +70,7 @@ const StudentHome: React.FC = () => {
 
         {options.map((opt) => (
           <Paper
-            key={opt.path}
+            key={opt.title}
             elevation={0}
             onClick={() => navigate(opt.path)}
             sx={{

@@ -18,8 +18,12 @@ import AdminHome from "./pages/AdminHome";
 import AdminSyllabusUpload from "./pages/AdminSyllabusUpload";
 import MarksheetHistory from "./pages/MarksheetHistory";
 import AdminMarksheetUpload from "./pages/AdminMarksheetUpload";
-import StudentReport from "./pages/StudentReport";
+
 import StudentHome from "./pages/StudentHome";
+
+import StudentProgress from "./pages/StudentProgress";
+import StudentReport from "./pages/StudentReport";
+
 
 const darkTheme = createTheme({
   palette: {
@@ -155,12 +159,22 @@ const App: React.FC = () => {
               }
             />
 
-            <Route
+             <Route
               path="/student/report"
               element={
-                <ProtectedRoute>
-                  <StudentReport />
-                </ProtectedRoute>
+                // <ProtectedRoute>
+                  <StudentReport/>
+              //  </ProtectedRoute>
+              }
+            />
+
+
+             <Route
+              path="/student/progress"
+              element={
+                // <ProtectedRoute>
+                  <StudentProgress />
+              //  </ProtectedRoute>
               }
             />
 
