@@ -1,8 +1,9 @@
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useState, useEffect } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useNavigate } from "react-router-dom";
 
 import {
   Box,
@@ -16,25 +17,37 @@ import {
 
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import SchoolIcon from "@mui/icons-material/School";
+import HistoryIcon from "@mui/icons-material/History";
 
-import { uploadSyllabus } from "../services/api";
-import {
-  DEPARTMENTS,
-  BATCH_YEARS,
-  SEMESTER_LEVELS,
-} from "../constants/academic";
+import { uploadMarksheet } from "../services/api";
+import { COLLEGES } from "../constants/academic";
 
 type FormDataType = {
-  department: string;
-  batch_year: string;
-  semester_level: string;
+  student_id: number;
+  semester: number;
+  college_id: number;
+  academic_year: string;
   pdf_file: FileList;
 };
 
 const schema = yup.object({
-  department: yup.string().required("Department is required"),
-  batch_year: yup.string().required("Batch year is required"),
-  semester_level: yup.string().required("Semester is required"),
+  student_id: yup
+    .number()
+    .typeError("Student ID is required")
+    .required("Student ID is required")
+    .positive("Student ID must be a positive number")
+    .integer("Student ID must be a whole number"),
+  semester: yup
+    .number()
+    .typeError("Semester is required")
+    .required("Semester is required")
+    .positive("Semester must be a positive number")
+    .integer("Semester must be a whole number"),
+  college_id: yup
+    .number()
+    .typeError("College is required")
+    .required("College is required"),
+  academic_year: yup.string().required("Academic year is required"),
   pdf_file: yup
     .mixed<FileList>()
     .required("Please select a PDF file")
@@ -42,8 +55,13 @@ const schema = yup.object({
     .test("pdf", "Only PDF allowed", (value) => !value || value.length === 0 || value[0].type === "application/pdf"),
 });
 
-function AdminUpload() {
+function AdminMarksheetUpload() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+const isAdmin = user.role === "ADMIN";
+const collegeId = user.college_id || "";
 
   const {
     register,
@@ -54,19 +72,29 @@ function AdminUpload() {
     formState: { errors },
   } = useForm<FormDataType>({
     resolver: yupResolver(schema),
-  });
+  defaultValues: {
+    college_id: collegeId,
+  },
+});
 
   const selectedFile = watch("pdf_file");
+
+  useEffect(() => {
+  if (isAdmin && collegeId) {
+    setValue("college_id", collegeId);
+  }
+}, [isAdmin, collegeId, setValue]);
 
   const onSubmit = async (data: FormDataType) => {
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append("department", data.department);
-      formData.append("batch_year", data.batch_year);
-      formData.append("semester_level", data.semester_level);
+      formData.append("student_id", String(data.student_id));
+      formData.append("semester", String(data.semester));
+      formData.append("college_id", String(data.college_id));
+      formData.append("academic_year", data.academic_year);
       formData.append("pdf_file", data.pdf_file[0]);
-      await uploadSyllabus(formData);
+      await uploadMarksheet(formData);
       alert("Upload successful ✔");
       reset();
     } catch (err) {
@@ -115,64 +143,96 @@ function AdminUpload() {
           </Typography>
         </Box>
 
-        <Typography sx={{ fontWeight: 700, fontSize: "1.5rem", color: "#fff", mb: 0.5 }}>
-          Upload Syllabus
-        </Typography>
-        <Typography sx={{ fontSize: "0.875rem", color: "rgba(255,255,255,0.45)", mb: 3 }}>
-          Upload syllabus PDFs for students
-        </Typography>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
+          <Box>
+            <Typography sx={{ fontWeight: 700, fontSize: "1.5rem", color: "#fff", mb: 0.5 }}>
+              Upload Marksheet
+            </Typography>
+            <Typography sx={{ fontSize: "0.875rem", color: "rgba(255,255,255,0.45)" }}>
+              Upload semester marksheet PDFs for students
+            </Typography>
+          </Box>
+
+          <Button
+            size="small"
+            startIcon={<HistoryIcon sx={{ fontSize: 18 }} />}
+            onClick={() => navigate("/admin/marksheet/history")}
+            sx={{
+              flexShrink: 0,
+              textTransform: "none",
+              fontWeight: 600,
+              fontSize: "0.8rem",
+              color: "rgba(255,255,255,0.65)",
+              borderRadius: "8px",
+              px: 1.5,
+              "&:hover": { color: "#fff", background: "rgba(16,185,129,0.1)" },
+            }}
+          >
+            History
+          </Button>
+        </Box>
 
         <Box component="form" onSubmit={handleSubmit(onSubmit)}>
 
-          {/* Department */}
+          {/* Student ID */}
           <TextField
-            select
             fullWidth
-            label="Department"
-            defaultValue=""
-            {...register("department")}
-            error={!!errors.department}
-            helperText={errors.department?.message}
+            type="number"
+            label="Student ID"
+            {...register("student_id")}
+            error={!!errors.student_id}
+            helperText={errors.student_id?.message}
             sx={{ mb: 2, ...inputSx }}
-          >
-            {DEPARTMENTS.map((d) => (
-              <MenuItem key={d} value={d} sx={menuItemSx}>{d}</MenuItem>
-            ))}
-          </TextField>
-
-          {/* Batch Year */}
-          <TextField
-            select
-            fullWidth
-            label="Batch Year"
-            defaultValue=""
-            {...register("batch_year")}
-            error={!!errors.batch_year}
-            helperText={errors.batch_year?.message}
-            sx={{ mb: 2, ...inputSx }}
-          >
-            {BATCH_YEARS.map((b) => (
-              <MenuItem key={b} value={b} sx={menuItemSx}>{b}</MenuItem>
-            ))}
-          </TextField>
+          />
 
           {/* Semester */}
           <TextField
-            select
             fullWidth
+            type="number"
             label="Semester"
-            defaultValue=""
-            {...register("semester_level")}
-            error={!!errors.semester_level}
-            helperText={errors.semester_level?.message}
+            {...register("semester")}
+            error={!!errors.semester}
+            helperText={errors.semester?.message}
             sx={{ mb: 2, ...inputSx }}
-          >
-            {SEMESTER_LEVELS.map((s) => (
-              <MenuItem key={s} value={s} sx={menuItemSx}>{s}</MenuItem>
-            ))}
-          </TextField>
+          />
 
-          {/* File Upload */}
+   
+          <TextField
+  select
+  fullWidth
+  label="College"
+  {...register("college_id")}
+  value={watch("college_id") || ""}
+  disabled={isAdmin}
+  error={!!errors.college_id}
+  helperText={
+    errors.college_id?.message ||
+    (isAdmin ? "Assigned college" : "")
+  }
+  sx={{ mb: 2, ...inputSx }}
+>
+  {COLLEGES.map((c) => (
+    <MenuItem
+      key={c.id}
+      value={c.id}
+      sx={menuItemSx}
+    >
+      {c.college_name}
+    </MenuItem>
+  ))}
+</TextField>
+
+          <TextField
+            fullWidth
+            label="Academic Year"
+            placeholder="e.g. 2023-2024"
+            {...register("academic_year")}
+            error={!!errors.academic_year}
+            helperText={errors.academic_year?.message}
+            sx={{ mb: 2, ...inputSx }}
+          />
+
+
           <Button
             component="label"
             variant="outlined"
@@ -217,7 +277,6 @@ function AdminUpload() {
             </Typography>
           )}
 
-          {/* Submit */}
           <Button
             type="submit"
             fullWidth
@@ -239,7 +298,7 @@ function AdminUpload() {
               "&:disabled": { background: "rgba(16,185,129,0.2)", color: "rgba(255,255,255,0.3)" },
             }}
           >
-            {loading ? <CircularProgress size={22} sx={{ color: "rgba(255,255,255,0.6)" }} /> : "Upload Syllabus"}
+            {loading ? <CircularProgress size={22} sx={{ color: "rgba(255,255,255,0.6)" }} /> : "Upload Marksheet"}
           </Button>
         </Box>
       </Paper>
@@ -269,4 +328,4 @@ const menuItemSx = {
   "&.Mui-selected": { background: "rgba(16,185,129,0.2)" },
 };
 
-export default AdminUpload;
+export default AdminMarksheetUpload;

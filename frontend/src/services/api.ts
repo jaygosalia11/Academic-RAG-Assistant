@@ -37,6 +37,7 @@ export const chatQuery = (payload: {
 };
 
 
+
 export const getChatHistory = (sessionId: string) => {
   return API.get(`/chat-history/${sessionId}`);
 };
@@ -50,6 +51,8 @@ export const registerUser = (payload: {
   department: string;
   batch: string;
   semester: string;
+  college_id: number;
+
 }) => {
   return API.post("/auth/register", payload);
 };
@@ -59,4 +62,30 @@ export const loginUser = (payload: {
   password: string;
 }) => {
   return API.post("/auth/login", payload);
+};
+
+export const uploadMarksheet = (formData: FormData) => {
+  return API.post("/admin/upload-marksheet", formData);
+};
+
+
+export const getAllMarksheets = () => {
+  return API.get("/admin/marksheets");
+};
+
+
+export const getStudentMarksheet = (
+  studentId: number,
+  semester: number
+) => {
+  return API.get(`/students/${studentId}/marksheets/${semester}`);
+};
+
+
+export const getDashboardSummary = (collegeId: number) => {
+  return API.get(`/admin/dashboard/summary/${collegeId}`);
+};
+
+export const getColleges = () => {
+  return API.get("/colleges");
 };

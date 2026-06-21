@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Box, Typography, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -73,7 +74,6 @@ const LandingPage = () => {
         </Box>
       </Box>
 
-      {/* Hero */}
       <Box sx={{
         maxWidth: 680,
         mx: "auto",
@@ -101,12 +101,12 @@ const LandingPage = () => {
           Get instant answers from your syllabus, course materials, and academic resources — powered by AI.
         </Typography>
 
-        {/* Feature cards */}
         {[
           { emoji: "📚", title: "Syllabus Search", desc: "Ask anything about your syllabus and get pinpoint answers instantly." },
           { emoji: "🤖", title: "AI-Powered Answers", desc: "Powered by local AI — your academic data stays private and secure." },
           { emoji: "🎯", title: "Department Filtered", desc: "Filter by department, batch year, and semester for accurate results." },
           { emoji: "💬", title: "Chat History", desc: "All your previous conversations saved and easy to revisit anytime." },
+          { emoji: "📊", title: "Marksheets & Grades", desc: "View your marksheet and grades for every semester, along with your semester-wise CGPA." },
         ].map((f) => (
           <Box key={f.title} sx={{
             display: "flex",

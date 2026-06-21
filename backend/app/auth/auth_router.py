@@ -17,6 +17,7 @@ class RegisterRequest(BaseModel):
     department: str
     batch: str
     semester: str
+    college_id: int
 
 
 class LoginRequest(BaseModel):
@@ -32,14 +33,16 @@ def register(req: RegisterRequest):
     if existing_user:
         raise HTTPException(status_code=400, detail="User already exists")
 
-    user = create_user(req.name, req.email, req.password,req.department, req.batch, req.semester)
+    user = create_user(req.name, req.email, req.password,req.department, req.batch, req.semester,req.college_id)
 
     return {
         "message": "User registered successfully",
         "user": {
             "id": user[0],
             "name": user[1],
-            "email": user[2]
+            "email": user[2],
+            "college_id": user[6],
+            "role": user[7]
         }
     }
 
@@ -57,14 +60,30 @@ def login(req: LoginRequest):
     if not verify_password(req.password, db_password):
         raise HTTPException(status_code=401, detail="Invalid password")
 
+    # return {
+    #     "message": "Login successful",
+    #     "user": {
+    #         "id": user[0],
+    #         "name": user[1],
+    #         "email": user[2],
+    #         "college_id": user[7],
+    #          "department": user[4],
+    #         "batch_year": user[5],
+    #         "semester_level": user[6],
+    #     }
+    # }
+
     return {
         "message": "Login successful",
         "user": {
             "id": user[0],
             "name": user[1],
             "email": user[2],
-             "department": user[4],
+            "department": user[4],
             "batch_year": user[5],
             "semester_level": user[6],
+            "college_id": user[7],
+            "college_name": user[8],
+            "role": user[9]
         }
     }

@@ -1,20 +1,26 @@
-import React, { useState } from "react";
+
+import React, { useEffect, useState } from "react";
 import {
   Box, Paper, Typography, TextField, Button,
-  IconButton, InputAdornment, MenuItem,
+  IconButton, InputAdornment, MenuItem, Autocomplete,
 } from "@mui/material";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import SchoolIcon from "@mui/icons-material/School";
-import { registerUser } from "../services/api";
+import { registerUser, getColleges } from "../services/api";
 import { toast } from "react-toastify";
 // @ts-ignore
 import "react-toastify/dist/ReactToastify.css";
 import { DEPARTMENTS, BATCH_YEARS, SEMESTER_LEVELS } from "../constants/academic";
+
+type College = {
+  id: number;
+  college_name: string;
+};
 
 const schema = yup.object({
   name: yup.string().required("Name is required"),
@@ -27,6 +33,10 @@ const schema = yup.object({
   department: yup.string().required("Department is required"),
   batch_year: yup.string().required("Batch year is required"),
   semester_level: yup.string().required("Semester is required"),
+  college_id: yup
+    .number()
+    .typeError("College is required")
+    .required("College is required"),
 });
 
 type FormData = {
@@ -37,16 +47,35 @@ type FormData = {
   department: string;
   batch_year: string;
   semester_level: string;
+  college_id: number;
 };
 
 const Register = () => {
   const navigate = useNavigate();
   const [showPwd, setShowPwd] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [colleges, setColleges] = useState<College[]>([]);
+  const [collegesLoading, setCollegesLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchColleges = async () => {
+      setCollegesLoading(true);
+      try {
+        const res = await getColleges();
+        setColleges(res.data?.data ?? []);
+      } catch (err) {
+        console.error("Failed to fetch colleges", err);
+      } finally {
+        setCollegesLoading(false);
+      }
+    };
+    fetchColleges();
+  }, []);
 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<FormData>({
     resolver: yupResolver(schema),
@@ -61,6 +90,7 @@ const Register = () => {
         department: data.department,
         batch: data.batch_year,
         semester: data.semester_level,
+        college_id: data.college_id,
       });
 
       console.log("Register success:", res.data);
@@ -108,6 +138,46 @@ const Register = () => {
             slotProps={{ input: { endAdornment: (<InputAdornment position="end"><IconButton onClick={() => setShowConfirm(!showConfirm)} edge="end" sx={{ color: "rgba(255,255,255,0.4)", "&:hover": { color: "#fff" } }}>{showConfirm ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}</IconButton></InputAdornment>) } }}
           />
 
+          {/* College - searchable autocomplete */}
+          <Controller
+            name="college_id"
+            control={control}
+            defaultValue={undefined}
+            render={({ field: { onChange, value } }) => (
+              <Autocomplete
+                options={colleges}
+                loading={collegesLoading}
+                getOptionLabel={(option) => option.college_name ?? ""}
+                isOptionEqualToValue={(option, val) => option.id === val.id}
+                value={colleges.find((c) => c.id === value) ?? null}
+                onChange={(_, newValue) => onChange(newValue ? newValue.id : undefined)}
+                sx={{ mb: 2, ...inputSx }}
+                slotProps={{
+                  paper: {
+                    sx: {
+                      background: "#1a1a2e",
+                      color: "#fff",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      "& .MuiAutocomplete-option": {
+                        "&:hover": { background: "rgba(16,185,129,0.15)" },
+                        '&[aria-selected="true"]': { background: "rgba(16,185,129,0.2)" },
+                      },
+                    },
+                  },
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="College"
+                    placeholder="Search college..."
+                    error={!!errors.college_id}
+                    helperText={errors.college_id?.message}
+                  />
+                )}
+              />
+            )}
+          />
+
           {/* Department */}
           <TextField select fullWidth label="Department" defaultValue="" {...register("department")} error={!!errors.department} helperText={errors.department?.message} sx={{ mb: 2, ...inputSx }}>
             {DEPARTMENTS.map((d) => <MenuItem key={d} value={d} sx={menuItemSx}>{d}</MenuItem>)}
@@ -150,6 +220,7 @@ const inputSx = {
   "& .MuiInputLabel-root.Mui-focused": { color: "#6ee7b7" },
   "& .MuiFormHelperText-root": { fontSize: "0.75rem" },
   "& .MuiSelect-icon": { color: "rgba(255,255,255,0.4)" },
+  "& .MuiAutocomplete-clearIndicator, & .MuiAutocomplete-popupIndicator": { color: "rgba(255,255,255,0.4)" },
 };
 
 const menuItemSx = {

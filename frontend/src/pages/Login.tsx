@@ -54,7 +54,7 @@ localStorage.setItem(
   JSON.stringify(res.data.user)
 );
 
-    navigate("/chat");
+    navigate("/student");
   } catch (err) {
     console.error("Login failed", err);
     alert("Invalid credentials");

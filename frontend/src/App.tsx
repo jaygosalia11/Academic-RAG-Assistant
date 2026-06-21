@@ -12,7 +12,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 
 import MainLayout from "./layout/MainLayout";
 
-import AdminUpload from "./pages/AdminUpload";
+
 import ChatPage from "./pages/ChatPage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -21,6 +21,12 @@ import LandingPage from "./pages/LandingPage";
 import { ToastContainer } from "react-toastify";
 // @ts-ignore
 import "react-toastify/dist/ReactToastify.css";
+import AdminHome from "./pages/AdminHome";
+import AdminSyllabusUpload from "./pages/AdminSyllabusUpload";
+import MarksheetHistory from "./pages/MarksheetHistory";
+import AdminMarksheetUpload from "./pages/AdminMarksheetUpload";
+import StudentReport from "./pages/StudentReport";
+import StudentHome from "./pages/StudentHome";
 
 const darkTheme = createTheme({
   palette: {
@@ -136,40 +142,85 @@ const App: React.FC = () => {
         <MainLayout>
           <Routes>
 
-            {/* Landing Page */}
+         
             <Route
               path="/"
               element={<LandingPage />}
             />
 
-            {/* Login */}
             <Route
               path="/login"
               element={<Login />}
             />
 
-            {/* Register */}
+  
             <Route
               path="/register"
               element={<Register />}
             />
 
-            {/* Protected Chat */}
+  
             <Route
               path="/chat"
               element={
-                // <ProtectedRoute>
+  
                   <ChatPage />
-                //  </ProtectedRoute> 
+
               }
             />
 
-            {/* Protected Admin */}
+
+            <Route
+              path="/student"
+              element={
+                // <ProtectedRoute>
+                  <StudentHome />
+              //  </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/student/report"
+              element={
+                // <ProtectedRoute>
+                  <StudentReport />
+              //  </ProtectedRoute>
+              }
+            />
+
             <Route
               path="/admin"
               element={
                 // <ProtectedRoute>
-                  <AdminUpload />
+                  <AdminHome />
+              //  </ProtectedRoute>
+              }
+            />
+
+
+            <Route
+              path="/admin/syllabus"
+              element={
+                // <ProtectedRoute>
+                  <AdminSyllabusUpload />
+              //  </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/marksheet"
+              element={
+                // <ProtectedRoute>
+                  <AdminMarksheetUpload />
+              //  </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/marksheet/history"
+              element={
+                // <ProtectedRoute>
+                  <MarksheetHistory />
               //  </ProtectedRoute>
               }
             />
