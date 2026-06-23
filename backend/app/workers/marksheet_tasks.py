@@ -63,28 +63,7 @@ def process_marksheet(document_id: int):
         print(parsed_data)
         print("\n=======================\n")
 
-        missing_fields = validate_marksheet(parsed_data)
-
-        if missing_fields:
-
-            print(f"Missing fields: {missing_fields}")
-
-            cursor.execute(
-                """
-                UPDATE academic_rag.documents
-                SET status = %s
-                WHERE id = %s
-            """,
-                ("NEEDS_REVIEW", document_id),
-            )
-
-            connection.commit()
-
-            return {
-                "document_id": document_id,
-                "status": "NEEDS_REVIEW",
-                "missing_fields": missing_fields,
-            }
+        
 
         # Save parsed JSON
         json_dir = "app/data/extracted_json"
